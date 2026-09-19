@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda — 4° Semestre Eng. Civil</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#0f2a43;
+    --grid-line: rgba(140,180,215,0.16);
+    --grid-line-strong: rgba(140,180,215,0.28);
+    --ink:#dce8f0;
+    --ink-dim:#93aec4;
+    --steel:#4c7ba3;
+    --steel-fill: rgba(76,123,163,0.22);
+    --marker:#ff6a3d;
+    --marker-fill: rgba(255,106,61,0.16);
+    --general:#5fb8a8;
+    --general-fill: rgba(95,184,168,0.16);
+    --free: rgba(220,232,240,0.05);
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    background:
+      repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 28px),
+      repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 28px),
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    padding: 28px 16px 60px;
+  }
+
+  .sheet{
+    max-width: 980px;
+    margin: 0 auto;
+    border: 2px solid var(--grid-line-strong);
+    position:relative;
+  }
+
+  /* --- Title block, like a real blueprint carimbo --- */
+  .titleblock{
+    display:grid;
+    grid-template-columns: 1fr auto;
+    border-bottom: 2px solid var(--grid-line-strong);
+  }
+  .titleblock-main{
+    padding: 22px 24px 18px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    letter-spacing: 0.18em;
+    color: var(--marker);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  h1{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:800;
+    font-size: clamp(22px, 4.5vw, 32px);
+    margin:0 0 6px;
+    letter-spacing: -0.01em;
+  }
+  .subtitle{
+    color:var(--ink-dim);
+    font-size:14px;
+    max-width: 520px;
+    line-height:1.5;
+  }
+  .stamp{
+    font-family:'JetBrains Mono', monospace;
+    border-left: 2px solid var(--grid-line-strong);
+    padding: 18px 22px;
+    font-size: 11px;
+    color: var(--ink-dim);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:6px;
+    min-width: 150px;
+  }
+  .stamp b{ color: var(--ink); font-size:12px; }
+  .stamp .rev{ color: var(--marker); }
+
+  /* --- Legend --- */
+  .legend{
+    display:flex;
+    flex-wrap:wrap;
+    gap: 18px;
+    padding: 14px 24px;
+    border-bottom: 2px solid var(--grid-line-strong);
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+  }
+  .legend-item{ display:flex; align-items:center; gap:8px; }
+  .legend-divider{ width:1px; background:var(--grid-line-strong); align-self:stretch; }
+  .method{
+    font-family:'JetBrains Mono', monospace;
+    font-size:9.5px;
+    letter-spacing:0.03em;
+    margin-top:3px;
+    opacity:0.9;
+  }
+  .swatch{ width:14px; height:14px; border-radius:2px; flex-shrink:0; }
+  .swatch.class{ background: var(--steel-fill); border:1.5px solid var(--steel); }
+  .swatch.study{ background: var(--marker-fill); border:1.5px solid var(--marker); }
+  .swatch.general{ background: var(--general-fill); border:1.5px solid var(--general); }
+  .swatch.free{ background: var(--free); border:1.5px dashed var(--grid-line-strong); }
+
+  /* --- Grid --- */
+  .grid-wrap{ overflow-x:auto; }
+  .grid{
+    display:grid;
+    grid-template-columns: 84px repeat(7, 1fr);
+    min-width: 920px;
+  }
+  .head-cell{
+    font-family:'JetBrains Mono', monospace;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    color: var(--ink);
+    padding: 12px 8px;
+    border-bottom: 2px solid var(--grid-line-strong);
+    border-left: 1px solid var(--grid-line);
+    text-align:center;
+  }
+  .head-cell.first{ border-left:none; }
+  .time-label{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+    padding: 10px 6px;
+    border-top: 1px solid var(--grid-line);
+    display:flex;
+    align-items:flex-start;
+    justify-content:flex-end;
+    text-align:right;
+  }
+  .cell{
+    border-top: 1px solid var(--grid-line);
+    border-left: 1px solid var(--grid-line);
+    padding: 8px;
+    min-height: 82px;
+    position:relative;
+  }
+  .block{
+    height:100%;
+    border-radius: 3px;
+    padding: 8px 9px 7px;
+    font-size: 12.5px;
+    line-height:1.35;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .block .name{ font-weight:600; }
+  .block .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:9.5px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    margin-top:4px;
+    opacity:0.85;
+  }
+  .block.class{ background:var(--steel-fill); border:1.5px solid var(--steel); }
+  .block.study{ background:var(--marker-fill); border:1.5px dashed var(--marker); }
+  .block.general{ background:var(--general-fill); border:1.5px dashed var(--general); }
+  .block.general .name{ color:#dff5ef; }
+  .block.free{
+    background: var(--free);
+    border:1px dashed var(--grid-line-strong);
+    color: var(--ink-dim);
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    align-items:center;
+    text-align:center;
+  }
+  .block.study .name{ color:#ffe3d6; }
+  .block.merge2{ grid-row: span 2; }
+
+  /* --- Footer notes --- */
+  .notes{
+    padding: 18px 24px 24px;
+    border-top: 2px solid var(--grid-line-strong);
+  }
+  .notes h2{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color: var(--marker);
+    margin: 0 0 10px;
+  }
+  .notes ul{
+    margin:0;
+    padding-left: 18px;
+    color: var(--ink-dim);
+    font-size: 13.5px;
+    line-height:1.7;
+  }
+  .notes li b{ color: var(--ink); font-weight:600; }
+
+  /* --- Sunday check-in checklist --- */
+  .checkin{
+    padding: 18px 24px 24px;
+    border-top: 2px solid var(--grid-line-strong);
+  }
+  .checkin-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom: 12px;
+  }
+  .checkin h2{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 13px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color: var(--marker);
+    margin: 0;
+  }
+  .checkin-timer{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+  }
+  .checkin-item{
+    display:flex;
+    align-items:flex-start;
+    gap:12px;
+    padding: 10px 12px;
+    border: 1.5px dashed var(--grid-line-strong);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    user-select:none;
+  }
+  .checkin-item:hover{ background: rgba(220,232,240,0.03); }
+  .checkin-item.done{
+    border-color: var(--general);
+    background: var(--general-fill);
+  }
+  .checkin-box{
+    width:18px; height:18px;
+    border: 1.5px solid var(--ink-dim);
+    border-radius: 3px;
+    flex-shrink:0;
+    margin-top: 1px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size: 12px;
+    font-family:'JetBrains Mono', monospace;
+    color: transparent;
+  }
+  .checkin-item.done .checkin-box{
+    border-color: var(--general);
+    background: var(--general);
+    color: #0f2a43;
+  }
+  .checkin-text{ font-size: 13.5px; line-height:1.45; }
+  .checkin-text b{ color: var(--ink); }
+  .checkin-text span{ color: var(--ink-dim); font-size:12px; display:block; margin-top:2px; }
+  .checkin-reset{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+    background:none;
+    border: 1px solid var(--grid-line-strong);
+    border-radius: 3px;
+    padding: 5px 10px;
+    cursor:pointer;
+    margin-top: 6px;
+  }
+  .checkin-reset:hover{ color: var(--ink); border-color: var(--ink-dim); }
+
+  /* --- Rotation cycle indicator --- */
+  .cycle{
+    margin: 0 24px 18px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--marker);
+    border-radius: 5px;
+    background: var(--marker-fill);
+  }
+  .cycle-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom: 10px;
+  }
+  .cycle-head h2{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color: var(--marker);
+    margin:0;
+  }
+  .cycle-week{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-dim);
+  }
+  .cycle-rows{ display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+  .cycle-row{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; flex-wrap:wrap; }
+  .cycle-label{ font-size:12px; color:var(--ink-dim); font-family:'JetBrains Mono', monospace; }
+  .cycle-value{ font-size:14px; font-weight:600; color: var(--ink); }
+  #cycleAdvance{ margin-top:0; margin-right:8px; }
+
+  @media (max-width: 600px){
+    .titleblock{ grid-template-columns: 1fr; }
+    .stamp{ border-left:none; border-top:2px solid var(--grid-line-strong); flex-direction:row; flex-wrap:wrap; }
+  }
+</style>
+</head>
+<body>
+
+<div class="sheet">
+
+  <div class="titleblock">
+    <div class="titleblock-main">
+      <div class="eyebrow">Planta de estudos · Semanal</div>
+      <h1>Engenharia Civil — 4° Semestre</h1>
+      <div class="subtitle">Grade de aulas com as 7 disciplinas distribuídas nos horários livres — reforço extra para Equações Diferenciais, Física Geral III e Mecânica dos Fluidos, sábado reduzido e domingo como buffer livre.</div>
+    </div>
+    <div class="stamp">
+      <div><b>Escala</b> 1 sem = 1 folha</div>
+      <div><b>Formato</b> Seg–Dom</div>
+      <div class="rev">Rev. 13 — adaptação ao notion</div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span class="swatch class"></span>Aula</div>
+    <div class="legend-item"><span class="swatch study"></span>Estudo prioritário</div>
+    <div class="legend-item"><span class="swatch general"></span>Estudo geral</div>
+    <div class="legend-item"><span class="swatch free"></span>Livre</div>
+    <div class="legend-divider"></div>
+    <div class="legend-item">🍅 Pomodoro 25/5</div>
+    <div class="legend-item">🎨 Fluxo 50/10</div>
+    <div class="legend-item">📝 Bloco único</div>
+  </div>
+
+  <div class="cycle" id="cycleBox">
+    <div class="cycle-head">
+      <h2>Ciclo da semana</h2>
+      <span id="cycleWeek" class="cycle-week">semana —</span>
+    </div>
+    <div class="cycle-rows">
+      <div class="cycle-row">
+        <span class="cycle-label">Segunda manhã (07:30–11:30)</span>
+        <span id="cycleMorning" class="cycle-value">—</span>
+      </div>
+      <div class="cycle-row">
+        <span class="cycle-label">Segunda 13:30–15:30</span>
+        <span id="cycleAfternoon" class="cycle-value">—</span>
+      </div>
+      <div class="cycle-row">
+        <span class="cycle-label">Quarta 13:30–17:30</span>
+        <span id="cycleWednesday" class="cycle-value">—</span>
+      </div>
+    </div>
+    <button class="checkin-reset" id="cycleAdvance">→ Avançar pra próxima semana</button>
+    <button class="checkin-reset" id="cycleReset">↺ Resetar pra semana 1</button>
+  </div>
+
+  <div class="grid-wrap">
+  <div class="grid">
+    <div class="head-cell first">Horário</div>
+    <div class="head-cell">Segunda</div>
+    <div class="head-cell">Terça</div>
+    <div class="head-cell">Quarta</div>
+    <div class="head-cell">Quinta</div>
+    <div class="head-cell">Sexta</div>
+    <div class="head-cell">Sábado</div>
+    <div class="head-cell">Domingo</div>
+
+    <!-- 07:30 - 09:30 -->
+    <div class="time-label">07:30<br>09:30</div>
+    <div class="cell merge2"><div class="block study"><div class="name">Sessão longa —<br>rotação prioritária*</div><div class="tag">07:30–11:30</div><div class="method">🍅 Pomodoro</div></div></div>
+    <div class="cell"><div class="block class"><div class="name">Projeto Arquitetônico</div></div></div>
+    <div class="cell"><div class="block class"><div class="name">Mecânica dos Sólidos I</div></div></div>
+    <div class="cell"><div class="block class"><div class="name">Equações Diferenciais</div></div></div>
+    <div class="cell"><div class="block class"><div class="name">Topografia</div></div></div>
+    <div class="cell merge2"><div class="block general"><div class="name">Projeto Arquitetônico</div><div class="tag">07:30–11:30 · entregas/desenho</div><div class="method">🎨 Fluxo 50/10</div></div></div>
+    <div class="cell merge2"><div class="block free">Livre<br><span style="font-size:10px">buffer da semana</span></div></div>
+
+    <!-- 09:30 - 11:30 -->
+    <div class="time-label">09:30<br>11:30</div>
+    <div class="cell"><div class="block free">continuação</div></div>
+    <div class="cell"><div class="block class"><div class="name">Projeto Arquitetônico</div></div></div>
+    <div class="cell"><div class="block class"><div class="name">Equações Diferenciais</div></div></div>
+    <div class="cell"><div class="block class"><div class="name">Mecânica dos Sólidos I</div></div></div>
+    <div class="cell"><div class="block class"><div class="name">Mecânica dos Fluidos</div></div></div>
+    <div class="cell"><div class="block free">continuação</div></div>
+    <div class="cell"><div class="block free">continuação</div></div>
+
+    <!-- 13:30 - 15:30 -->
+    <div class="time-label">13:30<br>15:30</div>
+    <div class="cell"><div class="block study"><div class="name">Rotação — Sólidos ⇄<br>Topografia</div><div class="tag">alternando semanalmente</div><div class="method">🍅 Pomodoro</div></div></div>
+    <div class="cell"><div class="block class"><div class="name">Física Geral III</div></div></div>
+    <div class="cell merge2"><div class="block study"><div class="name">Equações Dif. +<br>Mec. dos Fluidos</div><div class="tag">13:30–17:30</div><div class="method">🍅 Pomodoro</div></div></div>
+    <div class="cell"><div class="block class"><div class="name">Mecânica dos Fluidos</div></div></div>
+    <div class="cell"><div class="block class"><div class="name">Lab. Física Geral III</div></div></div>
+    <div class="cell"><div class="block general"><div class="name">Laboratório de Física III</div><div class="tag">relatório semanal · 13:30–15:30</div><div class="method">📝 Bloco único</div></div></div>
+    <div class="cell"><div class="block free">livre</div></div>
+
+    <!-- 15:30 - 17:30 -->
+    <div class="time-label">15:30<br>17:30</div>
+    <div class="cell"><div class="block study"><div class="name">Rotação prioritária —<br>reforço extra</div><div class="tag">EDO / Física III / Mec. Fluidos</div><div class="method">🍅 Pomodoro</div></div></div>
+    <div class="cell"><div class="block study"><div class="name">Física Geral III</div><div class="tag">reforço pós-aula</div><div class="method">🍅 Pomodoro</div></div></div>
+    <div class="cell"><div class="block free">continuação</div></div>
+    <div class="cell"><div class="block class"><div class="name">Topografia</div></div></div>
+    <div class="cell"><div class="block class"><div class="name">Física Geral III</div></div></div>
+    <div class="cell"><div class="block free">livre</div></div>
+    <div class="cell"><div class="block free">livre</div></div>
+
+  </div>
+  </div>
+
+  <div class="notes">
+    <h2>Notas de projeto</h2>
+    <ul>
+      <li><b>Segunda manhã</b> — sessão longa rotativa (EDO / Física III / Mec. Fluidos).</li>
+      <li><b>Segunda tarde</b> — 13:30–15:30 rotação semanal Sólidos ⇄ Topografia; 15:30–17:30 reforço extra da mesma matéria da manhã.</li>
+      <li><b>Terça 15:30–17:30</b> — Física III, reforço pós-aula.</li>
+      <li><b>Quarta tarde</b> — EDO + Mec. Fluidos, 4h fixas.</li>
+      <li><b>Sábado manhã</b> — Projeto Arquitetônico, fluxo contínuo.</li>
+      <li><b>Sábado tarde</b> — Lab. Física III até 15:30, bloco único.</li>
+      <li><b>Domingo</b> — buffer livre. <b>Em semana de prova</b>, vira automaticamente revisão da matéria: 15–20 min de Anki (aquecimento) + resto em exercícios/simulados.</li>
+      <li><b>Método por matéria</b>: 🍅 Pomodoro 25/5 (cálculo/exercício) · 🎨 Fluxo 50/10 (Projeto Arquitetônico) · 📝 Bloco único (Laboratório).</li>
+      <li><b>Entre blocos consecutivos</b> (aula → estudo ou estudo → estudo), 10–15 min de intervalo pra trocar de matéria/ambiente.</li>
+      <li><b>Badminton</b> — encaixa bem nas pausas longas entre ciclos de Pomodoro, como pausa ativa.</li>
+      <li>*Alterne a rotação de segunda-feira conforme o que estiver mais atrasado na semana.</li>
+    </ul>
+  </div>
+
+
+<script>
+  const MORNING_SUBJECTS = ['Mecânica dos Fluidos', 'Equações Diferenciais', 'Física Geral III'];
+  const AFTERNOON_SUBJECTS = ['Mecânica dos Sólidos I', 'Topografia'];
+  let cycleState = { week: 1, morningIndex: 0, afternoonIndex: 0 };
+
+  function render(state) {
+    document.getElementById('cycleWeek').textContent = 'semana ' + state.week;
+    const morning = MORNING_SUBJECTS[state.morningIndex];
+    document.getElementById('cycleMorning').textContent = morning;
+    document.getElementById('cycleAfternoon').textContent = AFTERNOON_SUBJECTS[state.afternoonIndex];
+
+    let wednesday;
+    if (morning === 'Equações Diferenciais') {
+      wednesday = 'Mecânica dos Fluidos + Equações Diferenciais';
+    } else if (morning === 'Mecânica dos Fluidos') {
+      wednesday = 'Equações Diferenciais + Mecânica dos Fluidos';
+    } else {
+      wednesday = 'Equações Diferenciais + Mecânica dos Fluidos';
+    }
+    document.getElementById('cycleWednesday').textContent = wednesday;
+  }
+
+  render(cycleState);
+
+  document.getElementById('cycleAdvance').addEventListener('click', () => {
+    cycleState = {
+      week: cycleState.week + 1,
+      morningIndex: (cycleState.morningIndex + 1) % MORNING_SUBJECTS.length,
+      afternoonIndex: (cycleState.afternoonIndex + 1) % AFTERNOON_SUBJECTS.length
+    };
+    render(cycleState);
+  });
+
+  document.getElementById('cycleReset').addEventListener('click', () => {
+    cycleState = { week: 1, morningIndex: 0, afternoonIndex: 0 };
+    render(cycleState);
+  });
+</script>
+
+</body>
+</html>
